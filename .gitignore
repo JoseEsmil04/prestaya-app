@@ -1,0 +1,64 @@
+# Logs
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+.DS_Store
+dist
+dist-ssr
+coverage
+/cypress
+
+.vscode/*
+dist/
+
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+*.tsbuildinfo
+# 🔐 Archivos sensibles
+.env
+.env.*
+
+# ⚙️ Archivos de configuración de dependencias
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# 🧪 Archivos de pruebas
+coverage/
+*.log
+
+# ⚡ Salidas de build
+dist/
+build/
+.vite/
+
+# 🔧 IDE/editor
+.vscode/
+
+# 🔍 Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# 📚 Archivos temporales o de caché
+*.local
+.cache/
+.npm/
+.tmp/
+*.swp
+*.bak
+*.orig
+
+# 🧪 Cypress & test output
+cypress/screenshots/
+cypress/videos/
