@@ -1,7 +1,7 @@
 export function formatFecha(fechaStr: string): string {
   const fecha = new Date(fechaStr)
   return fecha.toLocaleDateString('es-DO', {
-    day: '2-digit',
+    day: 'numeric',
     month: 'long',
     year: 'numeric',
   })

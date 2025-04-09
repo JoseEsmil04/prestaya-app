@@ -1,10 +1,8 @@
 <template>
   <div class="min-h-screen bg-[#121212]">
-    <!-- Header con estadísticas -->
     <PrestamosHeader :prestamo-store="prestamoStore" v-model="mostrarForm" />
 
     <div class="container mx-auto px-4">
-      <!-- Filtros -->
       <div class="border-b border-[#2a2a2a] mt-6">
         <div class="flex overflow-x-auto">
           <button
@@ -22,8 +20,6 @@
           </button>
         </div>
       </div>
-
-      <!-- Barra de búsqueda -->
       <div class="relative my-6">
         <input
           type="text"
@@ -46,8 +42,6 @@
           />
         </svg>
       </div>
-
-      <!-- Estados de carga y vacío -->
       <div v-if="prestamoStore.loading" class="flex flex-col items-center justify-center py-16">
         <span class="loading loading-spinner loading-lg text-[#5b5ef7] mb-4"></span>
         <p class="text-gray-400">Cargando préstamos...</p>
@@ -97,8 +91,6 @@
           Crear primer préstamo
         </button>
       </div>
-
-      <!-- Listado de préstamos -->
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
         <PrestamoCard
           v-for="prestamo in prestamosFiltrados"
@@ -107,8 +99,6 @@
         />
       </div>
     </div>
-
-    <!-- Modal de nuevo préstamo -->
     <div class="modal modal-bottom sm:modal-middle" :class="{ 'modal-open': mostrarForm }">
       <div class="modal-box bg-[#1e2130] text-white">
         <button @click="mostrarForm = false" class="btn btn-sm btn-circle absolute right-2 top-2">
@@ -124,9 +114,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import PrestamoCard from '../components/PrestamoCard.vue'
-import PrestamoForm from '../components/PrestamoForm.vue'
 import { usePrestamoStore } from '../store/prestamos.store'
 import PrestamosHeader from '../components/PrestamosHeader.vue'
+import PrestamoForm from '../components/PrestamoForm.vue'
 
 const prestamoStore = usePrestamoStore()
 const mostrarForm = ref(false)
@@ -143,12 +133,10 @@ const filtros = [
 const prestamosFiltrados = computed(() => {
   let resultado = prestamoStore.prestamos
 
-  // Aplicar filtro por estado
   if (filtroActual.value !== 'todos') {
     resultado = resultado.filter((p) => p.estado.toLowerCase() === filtroActual.value)
   }
 
-  // Aplicar búsqueda (asumimos que buscamos en monto o en algún otro campo)
   if (busqueda.value) {
     const termino = busqueda.value.toLowerCase()
     resultado = resultado.filter(
@@ -162,7 +150,6 @@ const prestamosFiltrados = computed(() => {
 </script>
 
 <style scoped>
-/* Iconos de Lucide con clases de utilidad */
 .i-lucide-plus-circle {
   background-color: currentColor;
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='8' x2='12' y2='16'%3E%3C/line%3E%3Cline x1='8' y1='12' x2='16' y2='12'%3E%3C/line%3E%3C/svg%3E");

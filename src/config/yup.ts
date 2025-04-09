@@ -1,6 +1,5 @@
 import * as yup from 'yup'
 
-// Establecer el idioma de los mensajes de error en español
 yup.setLocale({
   mixed: {
     default: 'No es válido',

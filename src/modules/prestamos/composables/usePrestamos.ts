@@ -1,35 +1,39 @@
 import { useForm } from 'vee-validate'
 import { computed } from 'vue'
 import * as yup from 'yup'
-import { EstadoPrestamo } from '../types/prestamo.type'
+import { EstadoPrestamo, type Prestamo } from '../types/prestamo.type'
 import { FrecuenciaPago } from '../types/frecuencia-pago.type'
 import { usePrestamoStore } from '../store/prestamos.store'
 import type { PrestamoFormValues } from '../types/prestamo-form.type'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'vue-router'
+import { calculateCurrentBalance } from '@/utils/calculateBalance'
+import { toTypedSchema } from '@vee-validate/yup'
 
 type EmitArg = (e: 'cerrar') => void
 
-export const usePrestamos = (emit: EmitArg) => {
+export const usePrestamos = (emit: EmitArg, prestamoId?: string) => {
   const router = useRouter()
   const prestamoStore = usePrestamoStore()
 
   const schema = yup.object({
-    monto: yup
-      .number()
-      .required('Este Campo es Requerido!')
-      .positive('El monto debe ser mayor a 0.'),
-    tasa_interes: yup
-      .number()
-      .required('Este Campo es Requerido!')
-      .positive('La tasa de Interes debe ser mayor a 0'),
+    nombre: yup.string().required('El nombre es obligatorio.').min(3),
+    contacto: yup
+      .string()
+      .required()
+      .matches(
+        /^(809|829|849)[\s\-]?[0-9]{3}[\s\-]?[0-9]{4}$/,
+        'Formato no válido. Ej: 849-555-1234 o 8495551234',
+      ),
+    monto: yup.number().required().positive().typeError('Debe ser un número'),
+    tasa_interes: yup.number().required().positive().typeError('Debe ser un número'),
     frecuencia_pago: yup.mixed<FrecuenciaPago>().oneOf(Object.values(FrecuenciaPago)).required(),
-    fecha_inicio: yup.string().required(),
+    fecha_inicio: yup.string().required('La fecha de inicio del prestamo es requerida.'),
     estado: yup.mixed<EstadoPrestamo>().oneOf(Object.values(EstadoPrestamo)).required(),
   })
 
   const { handleSubmit, values, defineField, errors } = useForm<PrestamoFormValues>({
-    validationSchema: schema,
+    validationSchema: toTypedSchema(schema),
     initialValues: {
       monto: 0,
       tasa_interes: 10,
@@ -38,6 +42,8 @@ export const usePrestamos = (emit: EmitArg) => {
     },
   })
 
+  const [nombre, nombreAttrs] = defineField('nombre')
+  const [contacto, contactoAttrs] = defineField('contacto')
   const [monto, montoAttrs] = defineField('monto')
   const [tasa_interes, tasa_interesAttrs] = defineField('tasa_interes')
   const [frecuencia_pago, frecuencia_pagoAttrs] = defineField('frecuencia_pago')
@@ -46,32 +52,60 @@ export const usePrestamos = (emit: EmitArg) => {
 
   const interesFijo = computed(() => Math.round(values.monto * (values.tasa_interes / 100)))
 
-  const onSubmit = handleSubmit(async (values: PrestamoFormValues) => {
+  const onSubmit = handleSubmit(async (formValues) => {
     try {
       const { data: session } = await supabase.auth.getSession()
       const userId = session?.session?.user.id
 
       if (!userId) {
         router.replace({ name: 'login' })
-        // Todo Hacer algo con Auth error
         return
       }
 
-      await prestamoStore.crearPrestamo({
-        ...values,
+      const payloadBase = {
+        nombre: formValues.nombre,
+        contacto: formValues.contacto,
+        monto: formValues.monto,
+        tasa_interes: formValues.tasa_interes,
         interes_fijo: interesFijo.value,
-        user_id: userId,
-        deudor_id: '123e4567-e89b-12d3-a456-426614174011',
-      })
+        estado: formValues.estado,
+        frecuencia_pago: formValues.frecuencia_pago,
+        fecha_inicio: formValues.fecha_inicio,
+      }
+
+      if (prestamoId) {
+        const prestamo = await prestamoStore.getPrestamoById(prestamoId)
+        await prestamoStore.actualizarPrestamo(prestamoId, {
+          ...payloadBase,
+
+          balance: calculateCurrentBalance(prestamo),
+        })
+      } else {
+        await prestamoStore.crearPrestamo({
+          ...payloadBase,
+          user_id: userId,
+          balance: calculateCurrentBalance({
+            ...values,
+            interes_fijo: interesFijo.value,
+            fecha_inicio: formValues.fecha_inicio,
+            frecuencia_pago: formValues.frecuencia_pago,
+          } as Prestamo),
+        })
+      }
+
       await prestamoStore.fetchPrestamos()
       emit('cerrar')
     } catch (error) {
-      console.log(error)
+      console.error('Error en onSubmit:', error)
     }
   })
 
   return {
     errors,
+    nombre,
+    nombreAttrs,
+    contacto,
+    contactoAttrs,
     monto,
     montoAttrs,
     tasa_interes,

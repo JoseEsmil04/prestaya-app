@@ -2,24 +2,43 @@
   <div
     class="card bg-base-100 hover:shadow-lg transition-all duration-300 border border-base-300 overflow-hidden"
   >
-    <!-- Header con monto y estado -->
     <div class="bg-base-200/50 p-4 flex justify-between items-center border-b border-base-300">
-      <h2 class="text-2xl font-bold">${{ prestamo.monto.toLocaleString() }}</h2>
+      <h2 class="text-2xl font-bold">Reynaldo Medina</h2>
       <span :class="['badge badge-outline px-3 py-2 font-medium text-xs', badgeClass]">
         {{ prestamo.estado.toUpperCase() }}
       </span>
     </div>
-
-    <!-- Cuerpo con detalles -->
     <div class="card-body p-4">
-      <div class="space-y-3">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <i class="i-lucide-currency text-primary"></i>
+          </div>
+          <div>
+            <p class="text-lg text-base-content/70">Cantidad Prestada</p>
+            <p class="text-lg font-semibold">${{ prestamo.monto.toLocaleString() }}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <i class="i-lucide-currency text-primary"></i>
+          </div>
+          <div>
+            <p class="text-lg text-base-content/70">Balance a la Fecha</p>
+            <p class="text-lg font-semibold">
+              ${{ calculateCurrentBalance(prestamo).toLocaleString() }}
+            </p>
+          </div>
+        </div>
+
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
             <i class="i-lucide-percent text-primary"></i>
           </div>
           <div>
-            <p class="text-sm text-base-content/70">Interés fijo</p>
-            <p class="font-semibold">${{ prestamo.interes_fijo }}</p>
+            <p class="text-lg text-base-content/70">Interés fijo</p>
+            <p class="text-lg font-semibold">${{ prestamo.interes_fijo }}</p>
           </div>
         </div>
 
@@ -28,25 +47,21 @@
             <i class="i-lucide-calendar text-primary"></i>
           </div>
           <div>
-            <p class="text-sm text-base-content/70">Frecuencia</p>
-            <p class="font-semibold">{{ prestamo.frecuencia_pago }}</p>
+            <p class="text-lg text-base-content/70">Frecuencia</p>
+            <p class="text-lg font-semibold capitalize">{{ prestamo.frecuencia_pago }}</p>
           </div>
         </div>
       </div>
-
-      <!-- Botón de acción -->
       <div class="border-t border-[#2a2a2a] p-3">
         <button
-          @click="showModal = true"
+          @click="showModal = !showModal"
           class="btn btn-outline group w-full text-[#5b5ef7] flex items-center justify-center gap-2 py-1"
         >
-          Ver Detalle
+          Ver Mas
           <i class="i-lucide-chevron-right transition-transform group-hover:translate-x-1"></i>
         </button>
       </div>
     </div>
-
-    <!-- Modal -->
     <PrestamoModal
       v-if="showModal"
       :show-modal="showModal"
@@ -61,6 +76,7 @@ import { computed, ref } from 'vue'
 import type { Prestamo } from '../types/prestamo.type'
 import { EstadoPrestamo } from '../types/prestamo.type'
 import PrestamoModal from './PrestamoModal.vue'
+import { calculateCurrentBalance } from '@/utils/calculateBalance'
 
 interface Props {
   prestamo: Prestamo
@@ -83,10 +99,18 @@ const badgeClass = computed(() => {
 })
 </script>
 <style scoped>
-/* Iconos de Lucide con clases de utilidad */
 .i-lucide-percent {
   background-color: currentColor;
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='19' y1='5' x2='5' y2='19'%3E%3C/line%3E%3Ccircle cx='6.5' cy='6.5' r='2.5'%3E%3C/circle%3E%3Ccircle cx='17.5' cy='17.5' r='2.5'%3E%3C/circle%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.i-lucide-currency {
+  background-color: currentColor;
+  mask-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNpcmNsZS1kb2xsYXItc2lnbi1pY29uIGx1Y2lkZS1jaXJjbGUtZG9sbGFyLXNpZ24iPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8+PHBhdGggZD0iTTE2IDhoLTZhMiAyIDAgMSAwIDAgNGg0YTIgMiAwIDEgMSAwIDRIOCIvPjxwYXRoIGQ9Ik0xMiAxOFY2Ii8+PC9zdmc+');
   mask-repeat: no-repeat;
   mask-size: 100% 100%;
   width: 1.25rem;

@@ -6,8 +6,6 @@
         <h1 class="text-xl font-bold text-[#0de8be]">Listado de Préstamos</h1>
         <p class="text-gray-400 mt-1">Gestiona y monitorea todos tus préstamos activos</p>
       </div>
-
-      <!-- Botón de nuevo préstamo -->
       <button
         class="btn bg-[#00c853] hover:bg-[#00a844] text-white border-none mb-6"
         @click="$emit('update:modelValue', true)"
@@ -67,7 +65,12 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { usePrestamoStore } from '../store/prestamos.store'
-defineProps<{ modelValue: boolean }>()
+
+interface Props {
+  modelValue: boolean
+}
+
+defineProps<Props>()
 defineEmits(['update:modelValue'])
 
 const prestamoStore = usePrestamoStore()

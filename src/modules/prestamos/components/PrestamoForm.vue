@@ -1,14 +1,47 @@
 <template>
-  <form @submit.prevent="onSubmit" class="space-y-6">
-    <!-- Sección de Información Principal -->
+  <form @submit.prevent="onSubmit" class="space-y-2">
     <div class="bg-base-200/50 p-4 rounded-lg">
       <h3 class="font-medium text-base-content/80 mb-4 flex items-center gap-2">
         <i class="i-lucide-info w-4 h-4"></i>
         Información Principal
       </h3>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="md:col-span-1">
+          <CustomInput
+            label="Nombre del Deudor"
+            v-model="nombre"
+            v-bind="nombreAttrs"
+            :error="errors.nombre"
+            class="input-money"
+          >
+          </CustomInput>
+        </div>
+        <div class="md:col-span-1">
+          <CustomInput
+            label="Telefono del Deudor"
+            v-model="contacto"
+            v-bind="contactoAttrs"
+            :error="errors.contacto"
+            class="input-percentage"
+          >
+            <template #icon>
+              <i class="i-lucide-percent w-5 h-5 text-primary/70"></i>
+            </template>
+            <template #hint>
+              <span class="text-xs text-base-content/60">Tasa de interés anual</span>
+            </template>
+          </CustomInput>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-base-200/50 p-4 rounded-lg">
+      <h3 class="font-medium text-base-content/80 mb-4 flex items-center gap-2">
+        <i class="i-lucide-info w-4 h-4"></i>
+        Monto y Tasa de Interes
+      </h3>
 
       <div class="grid gap-4 md:grid-cols-2">
-        <!-- Monto con formato de moneda -->
         <div class="md:col-span-1">
           <CustomInput
             label="Monto"
@@ -26,8 +59,6 @@
             </template>
           </CustomInput>
         </div>
-
-        <!-- Tasa de interés con formato de porcentaje -->
         <div class="md:col-span-1">
           <CustomInput
             label="Tasa de Interés"
@@ -47,16 +78,12 @@
         </div>
       </div>
     </div>
-
-    <!-- Sección de Condiciones -->
     <div class="bg-base-200/50 p-4 rounded-lg">
       <h3 class="font-medium text-base-content/80 mb-4 flex items-center gap-2">
         <i class="i-lucide-calendar w-4 h-4"></i>
         Condiciones y Plazos
       </h3>
-
       <div class="grid gap-4 md:grid-cols-2">
-        <!-- Frecuencia de pago con iconos -->
         <div class="md:col-span-1">
           <CustomSelect
             label="Frecuencia de Pago"
@@ -73,8 +100,6 @@
             </template>
           </CustomSelect>
         </div>
-
-        <!-- Fecha de inicio mejorada -->
         <div class="md:col-span-1">
           <CustomInput
             label="Fecha de Inicio"
@@ -93,14 +118,11 @@
         </div>
       </div>
     </div>
-
-    <!-- Estado del préstamo con badges de colores -->
     <div class="bg-base-200/50 p-4 rounded-lg">
       <h3 class="font-medium text-base-content/80 mb-4 flex items-center gap-2">
         <i class="i-lucide-activity w-4 h-4"></i>
         Estado del Préstamo
       </h3>
-
       <CustomSelect
         label="Estado"
         v-model="estado"
@@ -130,35 +152,6 @@
         </template>
       </CustomSelect>
     </div>
-
-    <!-- Resumen del préstamo -->
-    <!-- <div v-if="monto && tasa_interes" class="bg-primary/10 p-4 rounded-lg border border-primary/20">
-      <h3 class="font-medium text-primary mb-3 flex items-center gap-2">
-        <i class="i-lucide-file-text w-4 h-4"></i>
-        Resumen del Préstamo
-      </h3>
-
-      <div class="grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <p class="text-base-content/60">Monto total:</p>
-          <p class="font-semibold">${{ formatMoneda(monto) }}</p>
-        </div>
-        <div>
-          <p class="text-base-content/60">Interés fijo:</p>
-          <p class="font-semibold">${{ formatMoneda(monto * (tasa_interes / 100)) }}</p>
-        </div>
-        <div>
-          <p class="text-base-content/60">Frecuencia:</p>
-          <p class="font-semibold">{{ frecuencia_pago || 'No seleccionada' }}</p>
-        </div>
-        <div>
-          <p class="text-base-content/60">Fecha inicio:</p>
-          <p class="font-semibold">{{ formatFecha(fecha_inicio) }}</p>
-        </div>
-      </div>
-    </div> -->
-
-    <!-- Botones de acción -->
     <div class="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 pt-2">
       <button @click="emit('cerrar')" type="button" class="btn text-white btn-error gap-2">
         <i class="i-lucide-x w-4 h-4"></i>
@@ -167,26 +160,54 @@
 
       <button type="submit" class="btn btn-primary gap-2">
         <i class="i-lucide-save w-4 h-4"></i>
-        Guardar Préstamo
+        {{ prestamoId ? 'Guardar Prestamo' : 'Crear Prestamo' }}
       </button>
     </div>
   </form>
 </template>
 <script setup lang="ts">
 import { usePrestamos } from '../composables/usePrestamos'
-import { EstadoPrestamo } from '../types/prestamo.type'
+import { EstadoPrestamo, type Prestamo } from '../types/prestamo.type'
 import { FrecuenciaPago } from '../types/frecuencia-pago.type'
 import CustomInput from '@/modules/common/components/CustomInput.vue'
 import CustomSelect from '@/modules/common/components/CustomSelect.vue'
-// import { formatFecha, formatMoneda } from '@/utils/formatters'
+import { usePrestamoStore } from '../store/prestamos.store'
+import { onMounted, ref } from 'vue'
 
 const emit = defineEmits<{
   (e: 'cerrar'): void
 }>()
 
+interface Props {
+  prestamoId?: string
+}
+
+const props = defineProps<Props>()
+
+const prestamoStore = usePrestamoStore()
+const prestamo = ref<Prestamo | null>(null)
+
+onMounted(async () => {
+  if (!props.prestamoId) return
+
+  prestamo.value = await prestamoStore.getPrestamoById(props.prestamoId)
+  if (prestamo.value) {
+    nombre.value = prestamo.value.nombre
+    contacto.value = prestamo.value.contacto
+    monto.value = prestamo.value.monto
+    tasa_interes.value = prestamo.value.tasa_interes
+    estado.value = prestamo.value.estado
+    fecha_inicio.value = prestamo.value.fecha_inicio
+  }
+})
+
 const {
   onSubmit,
   errors,
+  nombre,
+  nombreAttrs,
+  contacto,
+  contactoAttrs,
   monto,
   montoAttrs,
   tasa_interes,
@@ -197,10 +218,9 @@ const {
   estadoAttrs,
   fecha_inicio,
   fecha_inicioAttrs,
-} = usePrestamos(emit)
+} = usePrestamos(emit, props.prestamoId)
 </script>
 <style scoped>
-/* Iconos de Lucide con clases de utilidad */
 .i-lucide-dollar-sign {
   background-color: currentColor;
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='1' x2='12' y2='23'%3E%3C/line%3E%3Cpath d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'%3E%3C/path%3E%3C/svg%3E");

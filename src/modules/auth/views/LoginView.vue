@@ -127,7 +127,6 @@ const handleLogin = async () => {
     return
   }
 
-  // Este ID debe ser el mismo que auth.uid()
   await supabase.from('usuarios').insert({
     id: user.id,
     email: user.email,
@@ -140,7 +139,7 @@ const handleLogin = async () => {
     return
   }
 
-  router.push({ name: 'prestamos' }) // o tu ruta principal
+  router.push({ name: 'prestamos' })
 
   loading.value = false
 }
