@@ -1,3 +1,5 @@
+import type { FrecuenciaPago } from './frecuencia-pago.type'
+
 export enum EstadoPrestamo {
   activo = 'activo',
   pagado = 'pagado',
@@ -13,8 +15,9 @@ export interface Prestamo {
   balance: number
   tasa_interes: number
   interes_fijo?: number // opcional, se puede calcular
-  frecuencia_pago: string
+  frecuencia_pago: FrecuenciaPago
   fecha_inicio: string
+  proxima_fecha_pago?: string
   estado: EstadoPrestamo
   created_at?: string
 }

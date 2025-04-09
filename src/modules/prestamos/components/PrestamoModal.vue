@@ -17,7 +17,7 @@
         <li><strong>Frecuencia:</strong> {{ prestamo.frecuencia_pago }}</li>
         <li><strong>Estado:</strong> {{ prestamo.estado }}</li>
         <li><strong>Inicio:</strong> {{ formatFecha(prestamo.fecha_inicio) }}</li>
-        <li><strong>Proximo Cobro:</strong> {{ nextPaymentDate }}</li>
+        <li><strong>Proximo Cobro:</strong> {{ formatFecha(prestamo.proxima_fecha_pago!) }}</li>
       </ul>
       <div class="pt-6 flex space-x-4 justify-center w-auto">
         <button class="flex-1 btn btn-outline btn-accent" @click="mostrarForm = true">
@@ -43,9 +43,7 @@
 
 <script setup lang="ts">
 import { formatFecha } from '@/utils/formatters'
-import { getNextPaymentDate } from '@/utils/next-date'
-import { computed, ref } from 'vue'
-import type { FrecuenciaPago } from '../types/frecuencia-pago.type'
+import { ref } from 'vue'
 import type { Prestamo } from '../types/prestamo.type'
 import PrestamoForm from './PrestamoForm.vue'
 
@@ -54,16 +52,10 @@ interface Props {
   prestamo: Prestamo
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 defineEmits(['cerrar'])
 
 const mostrarForm = ref(false)
-const nextPaymentDate = computed(() =>
-  getNextPaymentDate(
-    props.prestamo?.fecha_inicio as string,
-    props.prestamo?.frecuencia_pago as FrecuenciaPago,
-  ),
-)
 </script>
 
 <style scoped>

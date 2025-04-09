@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'vue-router'
 import { calculateCurrentBalance } from '@/utils/calculateBalance'
 import { toTypedSchema } from '@vee-validate/yup'
+import { getNextPaymentDate } from '@/utils/next-date'
 
 type EmitArg = (e: 'cerrar') => void
 
@@ -73,27 +74,31 @@ export const usePrestamos = (emit: EmitArg, prestamoId?: string) => {
         fecha_inicio: formValues.fecha_inicio,
       }
 
+      const balance = calculateCurrentBalance({
+        ...payloadBase,
+      } as Prestamo)
+
       if (prestamoId) {
-        const prestamo = await prestamoStore.getPrestamoById(prestamoId)
         await prestamoStore.actualizarPrestamo(prestamoId, {
           ...payloadBase,
-
-          balance: calculateCurrentBalance(prestamo),
+          balance,
+          proxima_fecha_pago: getNextPaymentDate(
+            payloadBase.fecha_inicio,
+            payloadBase.frecuencia_pago,
+          ),
         })
       } else {
         await prestamoStore.crearPrestamo({
           ...payloadBase,
           user_id: userId,
-          balance: calculateCurrentBalance({
-            ...values,
-            interes_fijo: interesFijo.value,
-            fecha_inicio: formValues.fecha_inicio,
-            frecuencia_pago: formValues.frecuencia_pago,
-          } as Prestamo),
+          balance,
+          proxima_fecha_pago: getNextPaymentDate(
+            payloadBase.fecha_inicio,
+            payloadBase.frecuencia_pago,
+          ),
         })
       }
 
-      await prestamoStore.fetchPrestamos()
       emit('cerrar')
     } catch (error) {
       console.error('Error en onSubmit:', error)

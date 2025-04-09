@@ -3,7 +3,7 @@
     class="card bg-base-100 hover:shadow-lg transition-all duration-300 border border-base-300 overflow-hidden"
   >
     <div class="bg-base-200/50 p-4 flex justify-between items-center border-b border-base-300">
-      <h2 class="text-2xl font-bold">Reynaldo Medina</h2>
+      <h2 class="text-2xl font-bold capitalize">{{ prestamo.nombre }}</h2>
       <span :class="['badge badge-outline px-3 py-2 font-medium text-xs', badgeClass]">
         {{ prestamo.estado.toUpperCase() }}
       </span>
