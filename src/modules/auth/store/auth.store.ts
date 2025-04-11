@@ -27,8 +27,8 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  onMounted(async () => {
-    await fetchPerfil()
+  onMounted(() => {
+    fetchPerfil()
   })
 
   return { usuario, fetchPerfil, nombre_negocio }

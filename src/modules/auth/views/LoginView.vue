@@ -2,7 +2,12 @@
   <div class="min-h-screen flex items-center justify-center bg-[#121212] p-4">
     <div class="w-full max-w-md">
       <h1 class="text-2xl font-bold text-white mb-6">Iniciar Sesión</h1>
-
+      <div
+        v-if="error"
+        class="bg-red-500/10 border text-center border-red-500 text-red-500 rounded p-3 mb-4"
+      >
+        {{ error }}
+      </div>
       <form @submit.prevent="handleLogin">
         <div class="mb-4">
           <label class="block text-gray-300 mb-2">Email</label>
@@ -14,7 +19,6 @@
             required
           />
         </div>
-
         <div class="mb-2">
           <label class="block text-gray-300 mb-2">Contraseña</label>
           <input
@@ -25,11 +29,11 @@
             required
           />
         </div>
-
         <div class="mb-4">
-          <a href="#" class="text-sm text-blue-400 hover:underline">¿Olvidaste tu contraseña?</a>
+          <RouterLink to="/reset-password" class="text-sm text-blue-400 hover:underline">
+            ¿Olvidaste tu contraseña?
+          </RouterLink>
         </div>
-
         <div class="mb-6">
           <label class="inline-flex items-center">
             <input
@@ -37,10 +41,9 @@
               v-model="rememberMe"
               class="form-checkbox h-5 w-5 text-blue-500 rounded border-gray-600 bg-[#1e1e1e]"
             />
-            <span class="ml-2 text-gray-300">Remember me</span>
+            <span class="ml-2 text-gray-300">Recordarme</span>
           </label>
         </div>
-
         <button
           type="submit"
           class="w-full cursor-pointer bg-[#5b5ef7] hover:bg-[#4b4ef0] text-white py-3 px-4 rounded transition-colors"
@@ -94,7 +97,7 @@
 
       <p class="text-center mt-6 text-gray-300">
         ¿No tienes una cuenta?
-        <a href="#" class="text-blue-400 hover:underline">Regístrate</a>
+        <RouterLink to="/register" class="text-blue-400 hover:underline">Regístrate</RouterLink>
       </p>
     </div>
   </div>
@@ -107,43 +110,67 @@ import { supabase } from '@/lib/supabaseClient'
 
 const email = ref('')
 const password = ref('')
-const loading = ref(false)
 const error = ref('')
+const loading = ref(false)
+const rememberMe = ref(false)
+
 const router = useRouter()
 
 const handleLogin = async () => {
   loading.value = true
   error.value = ''
-  const { error: loginError } = await supabase.auth.signInWithPassword({
+
+  const { data, error: loginError } = await supabase.auth.signInWithPassword({
     email: email.value,
     password: password.value,
   })
 
-  const { data: session } = await supabase.auth.getSession()
-  const user = session?.session?.user
-
-  if (!user) {
-    console.error('No se pudo obtener el usuario autenticado')
+  if (loginError) {
+    error.value = loginError.message
+    loading.value = false
     return
   }
 
-  await supabase.from('usuarios').insert({
+  const user = data.user
+
+  if (!data.user) {
+    error.value = 'Usuario no encontrado'
+    loading.value = false
+    return
+  }
+
+  if (!user.email_confirmed_at) {
+    router.push({ name: 'confirmation' })
+    return
+  }
+
+  if (rememberMe.value) {
+    localStorage.setItem('userEmail', email.value)
+  } else {
+    localStorage.removeItem('userEmail')
+  }
+
+  await supabase.from('usuarios').upsert({
     id: user.id,
     email: user.email,
-    nombre_negocio: 'Mi Negocio',
+    nombre_negocio: user.user_metadata?.nombre_negocio || 'Negocio sin nombre',
     plan: 'free',
   })
 
-  if (loginError) {
-    error.value = loginError.message
-    return
-  }
-
   router.push({ name: 'prestamos' })
-
   loading.value = false
 }
 
-const signInWithGoogle = () => {}
-const rememberMe = () => {}
+const signInWithGoogle = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + '/prestamos',
+    },
+  })
+
+  if (error) {
+    console.error('Error al iniciar sesión con Google:', error.message)
+  }
+}
 </script>

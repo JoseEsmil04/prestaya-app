@@ -1,18 +1,23 @@
-import type { Prestamo } from '@/modules/prestamos/types/prestamo.type'
+import type { FrecuenciaPago } from '@/modules/prestamos/types/frecuencia-pago.type'
 
-export const calculateCurrentBalance = (
-  prestamo: Prestamo,
-  currentDate: Date = new Date(),
-): number => {
-  const startDate = new Date(prestamo.fecha_inicio)
-  const msDifference = currentDate.getTime() - startDate.getTime()
+interface CurrentBalanceParams {
+  fechaInicio: string
+  frecuenciaPago: FrecuenciaPago
+  interesFijo: number
+  monto: number
+}
+export const calculateCurrentBalance = (options: CurrentBalanceParams): number => {
+  const { fechaInicio, frecuenciaPago, interesFijo, monto } = options
+
+  const startDate = new Date(fechaInicio)
+  const msDifference = new Date().getTime() - startDate.getTime()
   const daysElapsed = Math.max(0, Math.floor(msDifference / (1000 * 60 * 60 * 24)))
 
-  const intervalLength = prestamo.frecuencia_pago === 'quincenal' ? 15 : 30
+  const intervalLength = frecuenciaPago === 'quincenal' ? 15 : 30
   const intervalsPassed = Math.floor(daysElapsed / intervalLength)
 
-  const totalInterest = intervalsPassed * prestamo.interes_fijo!
-  const currentBalance = prestamo.monto + totalInterest
+  const totalInterest = intervalsPassed * interesFijo!
+  const currentBalance = monto + totalInterest
 
   return currentBalance
 }

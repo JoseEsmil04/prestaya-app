@@ -65,6 +65,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { usePrestamoStore } from '../store/prestamos.store'
+import { onMounted } from 'vue'
 
 interface Props {
   modelValue: boolean
@@ -75,7 +76,8 @@ defineEmits(['update:modelValue'])
 
 const prestamoStore = usePrestamoStore()
 const authStore = useAuthStore()
-console.log(authStore.nombre_negocio)
+
+onMounted(authStore.fetchPerfil)
 
 const calcularMontoTotal = () => {
   return prestamoStore.prestamos

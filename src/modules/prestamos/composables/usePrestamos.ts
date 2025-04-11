@@ -1,7 +1,7 @@
 import { useForm } from 'vee-validate'
 import { computed } from 'vue'
 import * as yup from 'yup'
-import { EstadoPrestamo, type Prestamo } from '../types/prestamo.type'
+import { EstadoPrestamo } from '../types/prestamo.type'
 import { FrecuenciaPago } from '../types/frecuencia-pago.type'
 import { usePrestamoStore } from '../store/prestamos.store'
 import type { PrestamoFormValues } from '../types/prestamo-form.type'
@@ -75,8 +75,11 @@ export const usePrestamos = (emit: EmitArg, prestamoId?: string) => {
       }
 
       const balance = calculateCurrentBalance({
-        ...payloadBase,
-      } as Prestamo)
+        fechaInicio: payloadBase.fecha_inicio,
+        frecuenciaPago: payloadBase.frecuencia_pago,
+        interesFijo: payloadBase.interes_fijo,
+        monto: payloadBase.monto,
+      })
 
       if (prestamoId) {
         await prestamoStore.actualizarPrestamo(prestamoId, {

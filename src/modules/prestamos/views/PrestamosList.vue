@@ -46,7 +46,6 @@
         <span class="loading loading-spinner loading-lg text-[#5b5ef7] mb-4"></span>
         <p class="text-gray-400">Cargando préstamos...</p>
       </div>
-
       <div
         v-else-if="prestamosFiltrados.length === 0"
         class="flex flex-col items-center justify-center py-16 text-center"
@@ -117,13 +116,14 @@ import PrestamoCard from '../components/PrestamoCard.vue'
 import { usePrestamoStore } from '../store/prestamos.store'
 import PrestamosHeader from '../components/PrestamosHeader.vue'
 import PrestamoForm from '../components/PrestamoForm.vue'
+import type { Filtro } from '../types/filtro.interface'
 
 const prestamoStore = usePrestamoStore()
 const mostrarForm = ref(false)
 const busqueda = ref('')
 const filtroActual = ref('todos')
 
-const filtros = [
+const filtros: Filtro[] = [
   { texto: 'Todos', valor: 'todos' },
   { texto: 'Activos', valor: 'activo' },
   { texto: 'Vencidos', valor: 'vencido' },
@@ -141,7 +141,7 @@ const prestamosFiltrados = computed(() => {
     const termino = busqueda.value.toLowerCase()
     resultado = resultado.filter(
       (p) =>
-        p.monto.toString().includes(termino) || p.frecuencia_pago.toLowerCase().includes(termino),
+        p.nombre.toString().includes(termino) || p.frecuencia_pago.toLowerCase().includes(termino),
     )
   }
 

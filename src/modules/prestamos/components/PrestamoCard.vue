@@ -16,7 +16,7 @@
           </div>
           <div>
             <p class="text-lg text-base-content/70">Cantidad Prestada</p>
-            <p class="text-lg font-semibold">${{ prestamo.monto.toLocaleString() }}</p>
+            <p class="text-lg font-semibold">${{ formatMoneda(prestamo.monto) }}</p>
           </div>
         </div>
 
@@ -26,9 +26,7 @@
           </div>
           <div>
             <p class="text-lg text-base-content/70">Balance a la Fecha</p>
-            <p class="text-lg font-semibold">
-              ${{ calculateCurrentBalance(prestamo).toLocaleString() }}
-            </p>
+            <p class="text-lg font-semibold">${{ formatMoneda(prestamo.balance) }}</p>
           </div>
         </div>
 
@@ -76,7 +74,7 @@ import { computed, ref } from 'vue'
 import type { Prestamo } from '../types/prestamo.type'
 import { EstadoPrestamo } from '../types/prestamo.type'
 import PrestamoModal from './PrestamoModal.vue'
-import { calculateCurrentBalance } from '@/utils/calculateBalance'
+import { formatMoneda } from '@/utils/formatters'
 
 interface Props {
   prestamo: Prestamo
