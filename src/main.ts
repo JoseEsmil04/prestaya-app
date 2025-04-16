@@ -6,7 +6,6 @@ import router from './router'
 import './config/yup'
 
 const app = createApp(App)
-
 app.use(createPinia())
 app.use(router)
 app.mount('#app')

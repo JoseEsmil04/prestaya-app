@@ -9,8 +9,9 @@ interface GetUser {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const usuario = ref<GetUser | null>(null)
-  const nombre_negocio = computed(() => usuario.value?.nombre_negocio)
+  const usuarioCompleto = ref<GetUser | null>(null)
+
+  const nombre_negocio = computed(() => usuarioCompleto.value?.nombre_negocio)
 
   const fetchPerfil = async () => {
     const { data } = await supabase.auth.getSession()
@@ -23,7 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
         .eq('id', user.id)
         .single()
 
-      if (!error) usuario.value = data
+      if (!error) usuarioCompleto.value = data
     }
   }
 
@@ -31,5 +32,5 @@ export const useAuthStore = defineStore('auth', () => {
     fetchPerfil()
   })
 
-  return { usuario, fetchPerfil, nombre_negocio }
+  return { usuario: usuarioCompleto, fetchPerfil, nombre_negocio }
 })

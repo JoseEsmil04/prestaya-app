@@ -1,6 +1,6 @@
 <template>
   <div class="bg-[#121212] border-b border-[#2a2a2a] pb-6">
-    <div class="container mx-auto px-4 py-6">
+    <div class="container mx-auto px-4 py-8 md:py-2">
       <div class="mb-6">
         <h1 class="text-3xl font-bold text-white">Hola {{ authStore.nombre_negocio }}</h1>
         <h1 class="text-xl font-bold text-[#0de8be]">Listado de Préstamos</h1>
@@ -10,16 +10,7 @@
         class="btn bg-[#00c853] hover:bg-[#00a844] text-white border-none mb-6"
         @click="$emit('update:modelValue', true)"
       >
-        <svg
-          class="w-5 h-5 mr-2"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-          <path d="M12 8V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          <path d="M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-        </svg>
+        <Plus />
         Nuevo Préstamo
       </button>
 
@@ -66,6 +57,7 @@
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { usePrestamoStore } from '../store/prestamos.store'
 import { onMounted } from 'vue'
+import { Plus } from 'lucide-vue-next'
 
 interface Props {
   modelValue: boolean
